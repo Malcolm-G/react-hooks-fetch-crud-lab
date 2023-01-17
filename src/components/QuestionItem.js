@@ -1,6 +1,6 @@
 import React from "react";
 
-function QuestionItem({ question,API,questions,setQuestions }) {
+function QuestionItem({ question,API,questions,setQuestions}) {
   const { id, prompt, answers, correctIndex } = question;
 
   const options = answers.map((answer, index) => (
@@ -11,7 +11,7 @@ function QuestionItem({ question,API,questions,setQuestions }) {
 
   function deleteQuestion(id){
     fetch(`${API}/${id}`,{
-      method:'DELETE'
+      method:'DELETE',
     })
     .then(resp=>resp.json())
     .then(data=>{
@@ -22,13 +22,39 @@ function QuestionItem({ question,API,questions,setQuestions }) {
 
   }
 
+  function changeAnswer(id,correctIndex){
+    fetch(`${API}/${id}`,{
+      method:'PATCH',
+      headers:{
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({'correctIndex':correctIndex})
+    })
+    .then(resp=>resp.json())
+    .then(data=>console.log(data))
+
+    const updatedquestions = questions.map(question => {
+        if (question.id === id) {
+            return { ...question, correctIndex }
+        } else {
+          return question 
+        }
+    })
+    setQuestions(updatedquestions)
+  }
+
   return (
     <li>
       <h4>Question {id}</h4>
       <h5>Prompt: {prompt}</h5>
       <label>
         Correct Answer:
-        <select defaultValue={correctIndex}>{options}</select>
+        <select
+        onChange={(event)=>{
+          changeAnswer(id,event.target.value);
+        }}
+        defaultValue={correctIndex}
+        >{options}</select>
       </label>
       <button onClick={()=>deleteQuestion(id)} >Delete Question</button>
     </li>
